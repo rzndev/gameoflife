@@ -33,13 +33,12 @@ public class GameConsole {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		boolean[][] cur_field = gameField.getField();
-		int rows = cur_field.length;
-		int cols = cur_field[0].length;
+		int rows = gameField.getRows();
+		int cols = gameField.getColumns();
 		for(int r = 0; r < rows; r++) {
 			if (r > 0) sb.append('\n');
 			for(int c = 0; c < cols; c++) {
-				if (cur_field[r][c])
+				if (gameField.isLive(r, c))
 					sb.append('*');
 				else
 					sb.append(' ');

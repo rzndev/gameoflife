@@ -13,6 +13,24 @@ import java.util.Random;
  */
 public final class GameField {
 	
+	
+	/**
+	 * Игровое поле
+	 */
+	private boolean[][] field;
+	
+	public int getRows()
+	{
+		if (field == null) return 0;
+		return field.length;
+	}
+	
+	public int getColumns()
+	{
+		if (field == null) return 0;
+		return field[0].length;
+	}
+	
 	/**
 	 * Создание нового игрового поля и заполнение случайными значениями
 	 * @param rows Количество строк
@@ -37,14 +55,6 @@ public final class GameField {
 		for(int r = 0; r < rows; r++)
 			for(int c = 0; c < cols; c++)
 				field[r][c] = prev.isLive(r, c);
-	}
-	
-	/**
-	 * Получить игровое поле
-	 * @return
-	 */
-	public boolean[][] getField() {
-		return field;
 	}
 	
 	/**
@@ -78,13 +88,13 @@ public final class GameField {
 			for(int c = -1; c <= 1; ++c)
 			{
 				if (r == 0 && c == 0) continue;
-				int effective_r = r + row;
-				int effective_c = c + col;
-				if (effective_r < 0) continue;
-				if (effective_c < 0) continue;
-				if (effective_r >= field.length) continue;
-				if (effective_c >= field[0].length) continue;
-				if (field[effective_r][effective_c]) ++result;
+				int effectiveR = r + row;
+				int effectiveC = c + col;
+				if (effectiveR < 0) effectiveR = field.length - effectiveR;
+				if (effectiveC < 0) effectiveC = field[0].length - effectiveC;
+				if (effectiveR >= field.length) effectiveR = effectiveR - field.length;
+				if (effectiveC >= field[0].length) effectiveC = effectiveC - field[0].length;
+				if (field[effectiveR][effectiveC]) ++result;
 			}
 		return result;
 	}
@@ -95,7 +105,7 @@ public final class GameField {
 	 * @param col Номер столбца ячейки
 	 * @return false - Жизни нет, true - Жизнь есть
 	 */
-	private boolean isLive(int row, int col) {
+	public boolean isLive(int row, int col) {
 		boolean current_cell = field[row][col];
 		int neighbourCount = getNeighbourCount(row, col);
 		
@@ -113,9 +123,5 @@ public final class GameField {
 		return false;
 	}
 	
-	
-	/**
-	 * Игровое поле
-	 */
-	private boolean[][] field;
+
 }
