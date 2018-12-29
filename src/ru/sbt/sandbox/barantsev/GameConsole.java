@@ -7,17 +7,17 @@ package ru.sbt.sandbox.barantsev;
 public class GameConsole {
 	
 	/**
-	 * Инициализация игрового поля
-	 * @param rows Количество строк
-	 * @param cols Количество столбцов
+	 * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РёРіСЂРѕРІРѕРіРѕ РїРѕР»СЏ
+	 * @param rows РљРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚СЂРѕРє
+	 * @param cols РљРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚РѕР»Р±С†РѕРІ
 	 */
 	public GameConsole(int rows, int cols) {
 		gameField = new GameField(rows, cols);
 	}
 	
 	/**
-	 * Выполнить генерацию следующего поколения
-	 * @return true, если поколение не изменилось, false, если изменилось
+	 * Р’С‹РїРѕР»РЅРёС‚СЊ РіРµРЅРµСЂР°С†РёСЋ СЃР»РµРґСѓСЋС‰РµРіРѕ РїРѕРєРѕР»РµРЅРёСЏ
+	 * @return true, РµСЃР»Рё РїРѕРєРѕР»РµРЅРёРµ РЅРµ РёР·РјРµРЅРёР»РѕСЃСЊ, false, РµСЃР»Рё РёР·РјРµРЅРёР»РѕСЃСЊ
 	 */
 	public boolean step() {
 		
@@ -28,7 +28,7 @@ public class GameConsole {
 	}
 	
 	/**
-	 * Формирование строки для вывода
+	 * Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃС‚СЂРѕРєРё РґР»СЏ РІС‹РІРѕРґР°
 	 */
 	@Override
 	public String toString() {
@@ -49,7 +49,7 @@ public class GameConsole {
 	}
 	
 	/**
-	 * Текущее игровое поле
+	 * РўРµРєСѓС‰РµРµ РёРіСЂРѕРІРѕРµ РїРѕР»Рµ
 	 */
 	private GameField gameField = null;
 }

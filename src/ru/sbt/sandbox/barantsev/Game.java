@@ -6,11 +6,11 @@ public class Game {
 
 	public static void main(String[] args) {
 		Scanner in = new Scanner(System.in);
-		System.out.print("ведите количество строк: ");
+		System.out.print("РІРµРґРёС‚Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚СЂРѕРє: ");
 		int rows = in.nextInt();
-		System.out.print("введите количество столбцов: ");
+		System.out.print("РІРІРµРґРёС‚Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚РѕР»Р±С†РѕРІ: ");
 		int cols = in.nextInt();
-		System.out.print("введите количество итераций: ");
+		System.out.print("РІРІРµРґРёС‚Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ РёС‚РµСЂР°С†РёР№: ");
 		int n = in.nextInt();
 		GameConsole game = new GameConsole(rows, cols);
 		System.out.println(game.toString());
