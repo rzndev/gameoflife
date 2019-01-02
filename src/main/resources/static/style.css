@@ -1,0 +1,36 @@
+table, th, td {
+border: 2px #2b2b2b solid;
+color: #2b2b2b;
+}
+
+#cellempty {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background: url("status.png") -32px 0;
+    background-repeat:no-repeat;
+}
+
+#celllive {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background: url("status.png") 0 0;
+    background-repeat:no-repeat;
+}
+
+#cellburn {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background: url("status.png") 0 -32px;
+    background-repeat:no-repeat;
+}
+
+#celldie {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background: url("status.png") -32px -32px;
+    background-repeat:no-repeat;
+}

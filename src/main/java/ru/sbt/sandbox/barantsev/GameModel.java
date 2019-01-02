@@ -18,20 +18,63 @@ public final class GameModel {
 	/**
 	 * Игровое поле
 	 */
-	private boolean[][] field;
-	
+	private FieldCell[][] field;
+
+
+	int numberOfReads = 0;
+
+    /**
+     *  Количество обращений к модели игры. Используется для отображения при
+     *  каждом нечетном обращении состояния изменения поля
+     */
+	public int getNumberOfReads() {
+	    return numberOfReads++;
+    }
+
+    /**
+     * Количество строк в игровом поле
+     * @return
+     */
 	public int getRows()
 	{
 		if (field == null) return 0;
 		return field.length;
 	}
-	
+
+    /**
+     * Количество столбцов в игровом поле
+     * @return
+     */
 	public int getColumns()
 	{
 		if (field == null) return 0;
 		return field[0].length;
 	}
-	
+
+    /**
+     * Получить состояние ячейки: есть жизнь / нет жизни
+     * @param row Строка
+     * @param col Столбец
+     * @return true - в ячейке есть жизнь, false - в ячейке нет жизни
+     */
+	public boolean getCell(int row, int col) {
+        if (null == field) return false;
+        if (row >= field.length || col >= field[0].length || row < 0 || col < 0) return false;
+        return field[row][col].live;
+    }
+
+    /**
+     * Получить состояние ячейки: есть жизнь / нет жизни
+     * @param row Строка
+     * @param col Столбец
+     * @return состояние изменений в ячейке
+     */
+    public FieldCell.Status getCellStatus(int row, int col) {
+        if (null == field) return FieldCell.Status.Empty;
+        if (row >= field.length || col >= field[0].length || row < 0 || col < 0) return FieldCell.Status.Empty;
+        return field[row][col].status;
+    }
+
 	/**
 	 * Создание нового игрового поля и заполнение случайными значениями
 	 * @param rows Количество строк
@@ -47,11 +90,17 @@ public final class GameModel {
      * @param cols Количество столбцов
      */
 	private void createGameField(int rows, int cols) {
-        field = new boolean[rows][cols];
+        field = new FieldCell[rows][cols];
         Random rnd = new Random();
         for(int r = 0; r < rows; r++)
-            for(int c = 0; c < cols; c++)
-                field[r][c] = rnd.nextBoolean();
+            for(int c = 0; c < cols; c++) {
+                field[r][c] = new FieldCell();
+                field[r][c].live = rnd.nextBoolean();
+                if (field[r][c].live)
+                    field[r][c].status = FieldCell.Status.Live;
+                else
+                    field[r][c].status = FieldCell.Status.Empty;
+            }
     }
 
 	/**
@@ -59,12 +108,12 @@ public final class GameModel {
 	 * @param other Сравниваемое поле
 	 * @return Возвращает true, если поля идентичны. false в противном случае
 	 */
-	private boolean isFieldsEqual(boolean[][] other) {
+	private boolean isFieldsEqual(FieldCell[][] other) {
 		if (other == null) return false;
 		if (other == field) return true;
 		for(int r = 0; r < field.length; r++)
-			if (!Arrays.equals(field[r], other[r]))
-				return false;
+			for (int c = 0; c < field[0].length; c++)
+			    if (field[r][c].live  != other[r][c].live)	return false;
 		return true;
 	}
 
@@ -100,7 +149,7 @@ public final class GameModel {
 				if (effectiveC < 0) effectiveC = field[0].length + effectiveC;
 				if (effectiveR >= field.length) effectiveR = effectiveR - field.length;
 				if (effectiveC >= field[0].length) effectiveC = effectiveC - field[0].length;
-				if (field[effectiveR][effectiveC]) ++result;
+				if (field[effectiveR][effectiveC].live) ++result;
 			}
 		return result;
 	}
@@ -112,7 +161,7 @@ public final class GameModel {
 	 * @return false - Жизни нет, true - Жизнь есть
 	 */
 	public boolean isLive(int row, int col) {
-		boolean current_cell = field[row][col];
+		boolean current_cell = field[row][col].live;
 		int neighbourCount = getNeighbourCount(row, col);
 		
 		if (current_cell) {
@@ -129,13 +178,6 @@ public final class GameModel {
 		return false;
 	}
 
-	public boolean isAllDead() {
-		for(int r = 0; r < field.length; r++)
-			for(int c = 0; c < field[0].length; c++)
-				if (field[r][c]) return false;
-		return true;
-	}
-
 	/**
 	 * Создание нового поколения
 	 * @return Возвращает true, если поколение не изменилось. false - в поколении произошли изменения
@@ -143,10 +185,24 @@ public final class GameModel {
 	public boolean step() {
 		int rows = field.length;
 		int cols = field[0].length;
-		boolean[][] field = new boolean[rows][cols];
+		FieldCell[][] field = new FieldCell[rows][cols];
 		for(int r = 0; r < rows; r++)
-			for(int c = 0; c < cols; c++)
-				field[r][c] = isLive(r, c);
+			for(int c = 0; c < cols; c++) {
+			    field[r][c] = new FieldCell();
+                field[r][c].live = isLive(r, c);
+                if (field[r][c].live != this.field[r][c].live) {
+                    if (field[r][c].live)
+                        field[r][c].status = FieldCell.Status.Burn;
+                    else
+                        field[r][c].status = FieldCell.Status.Die;
+                } else //(field[r][c].live != this.field[r][c].live)
+                {
+                    if (field[r][c].live)
+                        field[r][c].status = FieldCell.Status.Live;
+                    else
+                        field[r][c].status = FieldCell.Status.Empty;
+                }
+            }
 		boolean result = isFieldsEqual(field);
 		this.field = field;
 		return result;
