@@ -90,8 +90,8 @@ public final class GameField {
 				if (r == 0 && c == 0) continue;
 				int effectiveR = r + row;
 				int effectiveC = c + col;
-				if (effectiveR < 0) effectiveR = field.length - effectiveR;
-				if (effectiveC < 0) effectiveC = field[0].length - effectiveC;
+				if (effectiveR < 0) effectiveR = field.length + effectiveR;
+				if (effectiveC < 0) effectiveC = field[0].length + effectiveC;
 				if (effectiveR >= field.length) effectiveR = effectiveR - field.length;
 				if (effectiveC >= field[0].length) effectiveC = effectiveC - field[0].length;
 				if (field[effectiveR][effectiveC]) ++result;
@@ -122,6 +122,12 @@ public final class GameField {
 		}
 		return false;
 	}
-	
+
+	public boolean isAllDead() {
+		for(int r = 0; r < field.length; r++)
+			for(int c = 0; c < field[0].length; c++)
+				if (field[r][c]) return false;
+		return true;
+	}
 
 }

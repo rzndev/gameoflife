@@ -5,7 +5,12 @@ package ru.sbt.sandbox.barantsev;
  *
  */
 public class GameConsole {
-	
+
+	/**
+	 * Текущее игровое поле
+	 */
+	private GameField gameField = null;
+
 	/**
 	 * Инициализация игрового поля
 	 * @param rows Количество строк
@@ -47,9 +52,4 @@ public class GameConsole {
 		sb.append('\n');
 		return sb.toString();
 	}
-	
-	/**
-	 * Текущее игровое поле
-	 */
-	private GameField gameField = null;
 }
