@@ -4,14 +4,15 @@ package ru.sbt.sandbox.barantsev;
  * @author Alexander Barantsev
  *
  */
+import java.util.Arrays;
 import java.util.Random;
 
 /**
  * Игровое поле "Игры жизнь"
- * @author panasonic
+ * @author Alexander Barantsev
  *
  */
-public final class GameField {
+public final class GameModel {
 	
 	
 	/**
@@ -36,27 +37,37 @@ public final class GameField {
 	 * @param rows Количество строк
 	 * @param cols Количество столбцов
 	 */
-	public GameField(int rows, int cols) {
-		field = new boolean[rows][cols];
-		Random rnd = new Random();
-		for(int r = 0; r < rows; r++)
-			for(int c = 0; c < cols; c++)
-				field[r][c] = rnd.nextBoolean();
+	public GameModel(int rows, int cols) {
+	    createGameField(rows, cols);
 	}
-	
+
+    /**
+     * Создание нового игрового поля и заполнение случайными значениями
+     * @param rows Количество строк
+     * @param cols Количество столбцов
+     */
+	private void createGameField(int rows, int cols) {
+        field = new boolean[rows][cols];
+        Random rnd = new Random();
+        for(int r = 0; r < rows; r++)
+            for(int c = 0; c < cols; c++)
+                field[r][c] = rnd.nextBoolean();
+    }
+
 	/**
-	 * Создание нового поколения на основе другого игрового поля
-	 * @param prev Игровое поле, на основании которого генерируется новое поколение
+	 * Сравнение поля класса field с полем other
+	 * @param other Сравниваемое поле
+	 * @return Возвращает true, если поля идентичны. false в противном случае
 	 */
-	public GameField(GameField prev) {
-		int rows = prev.field.length;
-		int cols = prev.field[0].length;
-		field = new boolean[rows][cols];
-		for(int r = 0; r < rows; r++)
-			for(int c = 0; c < cols; c++)
-				field[r][c] = prev.isLive(r, c);
+	private boolean isFieldsEqual(boolean[][] other) {
+		if (other == null) return false;
+		if (other == field) return true;
+		for(int r = 0; r < field.length; r++)
+			if (!Arrays.equals(field[r], other[r]))
+				return false;
+		return true;
 	}
-	
+
 	/**
 	 * Сравнение игровых полей
 	 * @return true, если конфигурация идентична, false, если конфигурация отличается
@@ -66,14 +77,9 @@ public final class GameField {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		GameField other = (GameField)obj;
-		if (field.length != other.field.length) return false;
-		if (field[0].length != other.field[0].length) return false;
-		for(int r = 0; r < field.length; r++) 
-			for(int c = 0; c < field.length; c++)
-				if (field[r][c] != other.field[r][c])
-					return false;
- 	    return true;
+		GameModel other = (GameModel)obj;
+		if (field.length != other.field.length || field[0].length != other.field[0].length) return false;
+		return isFieldsEqual(other.field);
 	}
 
 	/**
@@ -130,4 +136,19 @@ public final class GameField {
 		return true;
 	}
 
+	/**
+	 * Создание нового поколения
+	 * @return Возвращает true, если поколение не изменилось. false - в поколении произошли изменения
+	 */
+	public boolean step() {
+		int rows = field.length;
+		int cols = field[0].length;
+		boolean[][] field = new boolean[rows][cols];
+		for(int r = 0; r < rows; r++)
+			for(int c = 0; c < cols; c++)
+				field[r][c] = isLive(r, c);
+		boolean result = isFieldsEqual(field);
+		this.field = field;
+		return result;
+	}
 }

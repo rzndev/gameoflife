@@ -3,15 +3,22 @@ package ru.sbt.sandbox.barantsev;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+
+
 @RestController
 public class GameController {
-
-    private GameWeb theGame = new GameWeb(10,10);
-
+    private final Object sync = new Object();
+    private GameModel theGame = new GameModel(10,10);
+    private GameView view = new GameView(theGame);
     @RequestMapping("/")
     public String index() {
-        String result = theGame.toString();
-        theGame.step();
+        String result = view.toString();
+        if (theGame.step()) {
+            synchronized (sync) {
+                theGame = new GameModel(10, 10);
+                view = new GameView(theGame);
+            }
+        };
         return result;
     }
 }

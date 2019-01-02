@@ -4,32 +4,24 @@ package ru.sbt.sandbox.barantsev;
  * @author Alexander Barantsev
  *
  */
-public class GameWeb {
+public class GameView {
     /**
      * Текущее игровое поле
      */
-    private GameField gameField = null;
+    private GameModel gameModel = null;
 
     /**
      * Инициализация игрового поля
-     * @param rows Количество строк
-     * @param cols Количество столбцов
+     * @param gameModel Модель игры жизнь
      */
-    public GameWeb(int rows, int cols) {
-        gameField = new GameField(rows, cols);
+    public GameView(GameModel gameModel) {
+        this.gameModel = gameModel;
     }
 
     /**
      * Выполнить генерацию следующего поколения
      * @return true, если поколение не изменилось, false, если изменилось
      */
-    public boolean step() {
-
-        GameField next = new GameField(gameField);
-        boolean result = next.equals(gameField);
-        gameField = next;
-        return result;
-    }
 
     /**
      * Формирование строки для вывода
@@ -43,8 +35,8 @@ public class GameWeb {
         sb.append("<TITLE>Game of life</TITLE>");
         sb.append("<BODY>");
         sb.append("<TABLE>");
-        int rows = gameField.getRows();
-        int cols = gameField.getColumns();
+        int rows = gameModel.getRows();
+        int cols = gameModel.getColumns();
         int r,c;
         sb.append("<TR>");
         for(c = 0; c < cols + 2; c++) sb.append("<TD>=</TD>");
@@ -55,10 +47,10 @@ public class GameWeb {
             if (r > 0) sb.append('\n');
             for(c = 0; c < cols; c++) {
                 sb.append("<TD>");
-                if (gameField.isLive(r, c))
-                    sb.append('*');
+                if (gameModel.isLive(r, c))
+                    sb.append("<img src=\"livecell.png\" alt=\"*\" border=0 height=32 width=32>");//sb.append('*');
                 else
-                    sb.append(' ');
+                    sb.append("<img src=\"emptycell.png\" alt=\" \" border=0 height=32 width=32>");//sb.append('*');//sb.append(' ');
                 sb.append("</TD>");
             }
             sb.append("<TD>!</TD>");
