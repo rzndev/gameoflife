@@ -1,30 +1,64 @@
 package ru.sbt.sandbox.barantsev;
 
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.ArrayList;
+import java.util.List;
 
-
-@RestController
+@Controller
 public class GameController {
-    private final Object sync = new Object();
-    private GameModel theGame = new GameModel(10,10);
-    private GameView view = new GameView(theGame);
-    @RequestMapping("/")
-    public String index() {
-        String result = "";
-        if (theGame.getNumberOfReads() % 2 == 0) {
-            result = view.toString();
-            if (theGame.step()) {
-                synchronized (sync) {
-                    theGame = new GameModel(10, 10);
-                    view = new GameView(theGame);
+
+    @Autowired
+    GameModel game;
+    @RequestMapping("/changes")
+    public String gamechanges(Model model) {
+        if (game.step()) {
+            game.createGameField(10, 10);
+        }
+        List<List<String>> gameField = new ArrayList<List<String>>();
+        for(int r = 0; r < game.getRows(); r++){
+            List<String> cols = new ArrayList<String>();
+            gameField.add(cols);
+            for (int c = 0; c < game.getColumns(); c++) {
+                switch (game.retrieveCellStatus(r, c)) {
+                    case Live:
+                        cols.add("celllive");
+                        break;
+                    case Empty:
+                        cols.add("cellempty");
+                        break;
+                    case Burn:
+                        cols.add("cellburn");
+                        break;
+                    case Die:
+                        cols.add("celldie");
+                        break;
                 }
             }
-        } else {
-            result = view.printChanges();
         }
+        model.addAttribute("url", "http://127.0.0.1:8080/");
+        model.addAttribute("gameField", gameField);
+        return "game";
+    }
 
-        return result;
+    @RequestMapping("/")
+    public String gamestatus(Model model) {
+        List<List<String>> gameField = new ArrayList<List<String>>();
+        for(int r = 0; r < game.getRows(); r++){
+            List<String> cols = new ArrayList<String>();
+            gameField.add(cols);
+            for (int c = 0; c < game.getColumns(); c++) {
+                if (game.retrieveCell(r, c))
+                    cols.add("celllive");
+                else
+                    cols.add("cellempty");
+            }
+        }
+        model.addAttribute("url", "http://127.0.0.1:8080/changes");
+        model.addAttribute("gameField", gameField);
+        return "game";
     }
 }

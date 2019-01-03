@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="style.css" rel="stylesheet" type="text/css"/>
+    <script th:inline="javascript">
+        setTimeout(function(){
+           window.location = /*[[${url}]]*/;
+        }, 1000);
+    </script>
+    <title>Game of life</title>
+</head>
+<body>
+<table>
+    <tr th:each="cols : ${gameField}">
+        <td th:each="col: ${cols}" th:id="${col}"/>
+    </tr>
+</table>
+</body>
+<body>
+</body>
+</html>

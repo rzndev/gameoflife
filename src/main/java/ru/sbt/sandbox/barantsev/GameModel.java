@@ -4,6 +4,8 @@ package ru.sbt.sandbox.barantsev;
  * @author Alexander Barantsev
  *
  */
+import org.springframework.stereotype.Component;
+
 import java.util.Arrays;
 import java.util.Random;
 
@@ -12,9 +14,14 @@ import java.util.Random;
  * @author Alexander Barantsev
  *
  */
-public final class GameModel {
-	
-	
+@Component
+public class GameModel {
+
+	/**
+	 * Объект синхронизации
+	 */
+	//private final Object sync = new Object();
+
 	/**
 	 * Игровое поле
 	 */
@@ -37,8 +44,15 @@ public final class GameModel {
      */
 	public int getRows()
 	{
-		if (field == null) return 0;
-		return field.length;
+		int result = 0;
+		//synchronized (sync)
+		{
+			if (field == null)
+				result = 0;
+			else
+				result = field.length;
+		}
+		return result;
 	}
 
     /**
@@ -47,8 +61,15 @@ public final class GameModel {
      */
 	public int getColumns()
 	{
-		if (field == null) return 0;
-		return field[0].length;
+		int result = 0;
+		//synchronized (sync)
+		{
+			if (field == null)
+				result = 0;
+			else
+				result =  field[0].length;
+		}
+		return result;
 	}
 
     /**
@@ -57,10 +78,17 @@ public final class GameModel {
      * @param col Столбец
      * @return true - в ячейке есть жизнь, false - в ячейке нет жизни
      */
-	public boolean getCell(int row, int col) {
-        if (null == field) return false;
-        if (row >= field.length || col >= field[0].length || row < 0 || col < 0) return false;
-        return field[row][col].live;
+	public boolean retrieveCell(int row, int col) {
+		boolean result = false;
+		//synchronized (sync)
+		{
+			if (null == field)
+				result = false;
+			else if (row >= field.length || col >= field[0].length || row < 0 || col < 0) result =  false;
+			else
+				result = field[row][col].live;
+		}
+        return result;
     }
 
     /**
@@ -69,11 +97,26 @@ public final class GameModel {
      * @param col Столбец
      * @return состояние изменений в ячейке
      */
-    public FieldCell.Status getCellStatus(int row, int col) {
-        if (null == field) return FieldCell.Status.Empty;
-        if (row >= field.length || col >= field[0].length || row < 0 || col < 0) return FieldCell.Status.Empty;
-        return field[row][col].status;
+    public FieldCell.Status retrieveCellStatus(int row, int col) {
+		FieldCell.Status result = FieldCell.Status.Empty;
+		//synchronized (sync)
+		{
+			if (null == field)
+				result = FieldCell.Status.Empty;
+			else if (row >= field.length || col >= field[0].length || row < 0 || col < 0)
+				result = FieldCell.Status.Empty;
+			else
+				result = field[row][col].status;
+		}
+		return result;
     }
+
+	/**
+	 * Создание игрового поля 10x10
+	 */
+	public GameModel() {
+    	this(10,10);
+	}
 
 	/**
 	 * Создание нового игрового поля и заполнение случайными значениями
@@ -89,8 +132,8 @@ public final class GameModel {
      * @param rows Количество строк
      * @param cols Количество столбцов
      */
-	private void createGameField(int rows, int cols) {
-        field = new FieldCell[rows][cols];
+	protected void createGameField(int rows, int cols) {
+		FieldCell[][] field = new FieldCell[rows][cols];
         Random rnd = new Random();
         for(int r = 0; r < rows; r++)
             for(int c = 0; c < cols; c++) {
@@ -101,6 +144,10 @@ public final class GameModel {
                 else
                     field[r][c].status = FieldCell.Status.Empty;
             }
+        //synchronized (sync)
+		{
+			this.field = field;
+		}
     }
 
 	/**
@@ -109,12 +156,25 @@ public final class GameModel {
 	 * @return Возвращает true, если поля идентичны. false в противном случае
 	 */
 	private boolean isFieldsEqual(FieldCell[][] other) {
-		if (other == null) return false;
-		if (other == field) return true;
-		for(int r = 0; r < field.length; r++)
-			for (int c = 0; c < field[0].length; c++)
-			    if (field[r][c].live  != other[r][c].live)	return false;
-		return true;
+		boolean result= false;
+		//synchronized (sync)
+		{
+			if (other == null)
+				result = false;
+			else if (other == field)
+				result = true;
+			else {
+				result = true;
+				loop:
+				for (int r = 0; r < field.length; r++)
+					for (int c = 0; c < field[0].length; c++)
+						if (field[r][c].live != other[r][c].live) {
+							result = false;
+							break loop;
+						}
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -127,8 +187,12 @@ public final class GameModel {
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		GameModel other = (GameModel)obj;
-		if (field.length != other.field.length || field[0].length != other.field[0].length) return false;
-		return isFieldsEqual(other.field);
+		boolean result = false;
+		//synchronized (sync)
+		{
+			result = (field.length == other.field.length && field[0].length == other.field[0].length && isFieldsEqual(other.field));
+		}
+		return result;
 	}
 
 	/**
@@ -139,18 +203,20 @@ public final class GameModel {
 	 */
 	private int getNeighbourCount(int row, int col) {
 		int result = 0;
-		for(int r = -1; r <= 1; ++r)
-			for(int c = -1; c <= 1; ++c)
-			{
-				if (r == 0 && c == 0) continue;
-				int effectiveR = r + row;
-				int effectiveC = c + col;
-				if (effectiveR < 0) effectiveR = field.length + effectiveR;
-				if (effectiveC < 0) effectiveC = field[0].length + effectiveC;
-				if (effectiveR >= field.length) effectiveR = effectiveR - field.length;
-				if (effectiveC >= field[0].length) effectiveC = effectiveC - field[0].length;
-				if (field[effectiveR][effectiveC].live) ++result;
-			}
+		//synchronized (sync) {
+		{
+			for (int r = -1; r <= 1; ++r)
+				for (int c = -1; c <= 1; ++c) {
+					if (r == 0 && c == 0) continue;
+					int effectiveR = r + row;
+					int effectiveC = c + col;
+					if (effectiveR < 0) effectiveR = field.length + effectiveR;
+					if (effectiveC < 0) effectiveC = field[0].length + effectiveC;
+					if (effectiveR >= field.length) effectiveR = effectiveR - field.length;
+					if (effectiveC >= field[0].length) effectiveC = effectiveC - field[0].length;
+					if (field[effectiveR][effectiveC].live) ++result;
+				}
+		}
 		return result;
 	}
 	
@@ -183,8 +249,12 @@ public final class GameModel {
 	 * @return Возвращает true, если поколение не изменилось. false - в поколении произошли изменения
 	 */
 	public boolean step() {
-		int rows = field.length;
-		int cols = field[0].length;
+		int rows = 0, cols = 0;
+		//synchronized (sync) {
+		{
+			rows = field.length;
+			cols = field[0].length;
+		}
 		FieldCell[][] field = new FieldCell[rows][cols];
 		for(int r = 0; r < rows; r++)
 			for(int c = 0; c < cols; c++) {
@@ -204,7 +274,10 @@ public final class GameModel {
                 }
             }
 		boolean result = isFieldsEqual(field);
-		this.field = field;
+		//synchronized (sync)
+		{
+			this.field = field;
+		}
 		return result;
 	}
 }
