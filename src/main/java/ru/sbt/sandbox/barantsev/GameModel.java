@@ -8,6 +8,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+
+import static ru.sbt.sandbox.barantsev.FieldCell.Status.Empty;
+import static ru.sbt.sandbox.barantsev.FieldCell.Status.Live;
 
 /**
  * Игровое поле "Игры жизнь"
@@ -72,45 +77,6 @@ public class GameModel {
 		return result;
 	}
 
-    /**
-     * Получить состояние ячейки: есть жизнь / нет жизни
-     * @param row Строка
-     * @param col Столбец
-     * @return true - в ячейке есть жизнь, false - в ячейке нет жизни
-     */
-	public boolean retrieveCell(int row, int col) {
-		boolean result = false;
-		//synchronized (sync)
-		{
-			if (null == field)
-				result = false;
-			else if (row >= field.length || col >= field[0].length || row < 0 || col < 0) result =  false;
-			else
-				result = field[row][col].live;
-		}
-        return result;
-    }
-
-    /**
-     * Получить состояние ячейки: есть жизнь / нет жизни
-     * @param row Строка
-     * @param col Столбец
-     * @return состояние изменений в ячейке
-     */
-    public FieldCell.Status retrieveCellStatus(int row, int col) {
-		FieldCell.Status result = FieldCell.Status.Empty;
-		//synchronized (sync)
-		{
-			if (null == field)
-				result = FieldCell.Status.Empty;
-			else if (row >= field.length || col >= field[0].length || row < 0 || col < 0)
-				result = FieldCell.Status.Empty;
-			else
-				result = field[row][col].status;
-		}
-		return result;
-    }
-
 	/**
 	 * Создание игрового поля 10x10
 	 */
@@ -140,9 +106,9 @@ public class GameModel {
                 field[r][c] = new FieldCell();
                 field[r][c].live = rnd.nextBoolean();
                 if (field[r][c].live)
-                    field[r][c].status = FieldCell.Status.Live;
+                    field[r][c].status = Live;
                 else
-                    field[r][c].status = FieldCell.Status.Empty;
+                    field[r][c].status = Empty;
             }
         //synchronized (sync)
 		{
@@ -151,7 +117,7 @@ public class GameModel {
     }
 
 	/**
-	 * Сравнение поля класса field с полем other
+	 * Сравнение поля класса field с аргументом other
 	 * @param other Сравниваемое поле
 	 * @return Возвращает true, если поля идентичны. false в противном случае
 	 */
@@ -268,9 +234,9 @@ public class GameModel {
                 } else //(field[r][c].live != this.field[r][c].live)
                 {
                     if (field[r][c].live)
-                        field[r][c].status = FieldCell.Status.Live;
+                        field[r][c].status = Live;
                     else
-                        field[r][c].status = FieldCell.Status.Empty;
+                        field[r][c].status = Empty;
                 }
             }
 		boolean result = isFieldsEqual(field);
@@ -279,5 +245,69 @@ public class GameModel {
 			this.field = field;
 		}
 		return result;
+	}
+
+	/**
+	 * Получить список изменений ячеек на игровом поле
+	 * @return Возвращает список списка строк, в котором содержится информация по строкам и столбцам
+	 */
+	public List<List<String>> retrieveChanges() {
+		List<List<String>> gameChanges = new ArrayList<>();
+		if (null == field) {
+			List<String> tmp = new ArrayList<>();
+			tmp.add("cellempty");
+			gameChanges.add(tmp);
+			return gameChanges;
+		}
+		final int rowsCount = field.length;
+		final int columnsCount = field[0].length;
+        for(int r = 0; r < rowsCount; r++) {
+			List<String> cols = new ArrayList<>();
+			gameChanges.add(cols);
+			for (int c = 0; c < columnsCount; c++) {
+				switch (field[r][c].status) {
+					case Live:
+						cols.add("celllive");
+						break;
+					case Empty:
+						cols.add("cellempty");
+						break;
+					case Burn:
+						cols.add("cellburn");
+						break;
+					case Die:
+						cols.add("celldie");
+						break;
+				}
+			}
+		}
+        return gameChanges;
+	}
+
+	/**
+	 * Получить состояние ячеек на игровом поле
+	 * @return Возвращает список списка строк, в котором содержится информация по строкам и столбцам
+	 */
+	public List<List<String>> retrieveState() {
+		List<List<String>> gameStatus = new ArrayList<>();
+		if (null == field) {
+			List<String> tmp = new ArrayList<>();
+			tmp.add("cellempty");
+			gameStatus.add(tmp);
+			return gameStatus;
+		}
+		final int rowsCount = field.length;
+		final int columnsCount = field[0].length;
+		for(int r = 0; r < rowsCount; r++) {
+			List<String> cols = new ArrayList<>();
+			gameStatus.add(cols);
+			for (int c = 0; c < columnsCount; c++) {
+				if (field[r][c].live)
+						cols.add("celllive");
+				else
+						cols.add("cellempty");
+			}
+		}
+		return gameStatus;
 	}
 }
